@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Image Viewer</title>
+    <style>
+        div{
+            padding: 0px;
+            border: 0px;
+            margin:0px;
+        }
+        div.image {
+            display:inline-block;
+            height:20px;
+        }
+
+        img{
+            width:40px;
+            height: auto;
+            vertical-align: top;
+            overflow:hidden;
+            smargin-bottom:-2px;
+
+            user-drag: none; 
+            user-select: none;
+            -moz-user-select: none;
+            -webkit-user-drag: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+
+        }
+
+        #canvas{
+            width: max-content;
+        }
+        .highlight{
+            position: relative;
+        }
+        .highlight:after {
+          content: " ";
+          z-index: 10;
+          display: block;
+          position: absolute;
+          height: 100%;
+          top: 0;
+          left: 0;
+          right: 0;
+          background: rgba(255, 0, 0, 0.5);
+        }
+        textarea{
+            width:1000px;
+        }
+        input {
+            width: 22em;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="tools">
+        <label for="frame">Frame</label><input type="text" name="frame" id="frame" value="20180326_071412_NF-001"/>
+        <br>
+        <label for="scale">Scale</label><input type="text" name="scale" id="scale" value="1"/>
+        <br>
+        <button id="ok">OK</button>
+        <br>
+        <textarea type="textarea"></textarea><br>
+        <button id="getNames">Get Names</button>
+    </div>
+    <div id="canvas">
+    </div>
+    
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script>
+
+    var homePath = "/data/LearnNeuralNetworks/labeled/not-labeled/";
+    
+    var frameName = $("#frame").val();
+    var scale = $("#scale").val();
+
+    function imgError(img) {
+        img.onerror = "";
+        img.src = "images/noimage.jpg";
+        return true;
+    }
+
+    function buildImageMap(){
+        var maxY = 1080;
+        var maxX = 1920;
+
+        var ratio = 1.6666;
+
+        if(scale > 1){
+            maxX = Math.round(1920.0 / ((scale-1)*ratio));
+            maxY = Math.round(1080.0 / ((scale-1)*ratio));
+            
+        }
+
+        var dev = false;
+        if(dev){
+            maxY = maxY / 8
+            maxX = maxX / 8
+        }
+
+        $("div.image").remove();
+
+        for(var y=0; y<maxY; y+=20){
+            var row = $('<div>');
+            for(var x=0; x<maxX; x+=20){
+                imgName = frameName + "-" + scale + "-"; 
+                imgName = imgName + x + "-" + y + ".jpg";
+                
+
+                var div = $('<div class="image"></div>');
+                var img = $('<img onerror="imgError(this)">');
+
+                img.attr('src', homePath + imgName);
+
+                div.append(img);
+                row.append(div);
+            }
+            $("#canvas").append(row)
+        }
+
+        $("div.image").height(20*scale)
+        $("div.image").width(40*scale)
+        $("img").height(20*scale)
+        $("img").width(40*scale)
+
+    }
+
+    function domReady() {
+
+       buildImageMap();
+        
+    }
+
+    var isDown;
+    $("#canvas").mousedown(function() {
+        isDown = true;      // When mouse goes down, set isDown to true
+        
+    })
+    .mouseup(function() {
+        isDown = false;    // When mouse goes up, set isDown to false
+        
+    });
+
+    $("#canvas").on("mousdown mouseover", "div.image", function(e){
+        // e.preventDefault();
+        if(isDown) {      
+            $(e.currentTarget).addClass("highlight")
+        }
+    });
+
+    $("#canvas").on("click", "div.image", function(e){
+        // e.preventDefault();
+           
+        $(e.currentTarget).toggleClass("highlight")
+        
+    });
+
+    $("#ok").click(function(){
+
+        $("textarea").text("");
+
+        frameName = $("#frame").val();
+        scale = $("#scale").val();
+        
+
+        buildImageMap();
+    });
+
+    $("#getNames").click(function(){
+        $("textarea").text("");
+
+        var values = "("
+        $(".highlight").each(function(idx){
+            var srcItems = $("img", this)[0].src.split('/');
+           
+            values = values + "\"" + srcItems[srcItems.length -1] + "\",";
+
+            
+        })
+
+
+        values = values.substring(0, values.length-1) + ")";
+
+        $("textarea").append(values + "\n")
+
+    });
+
+
+    $( domReady );
+
+</script>
+
+</body>
+</html>

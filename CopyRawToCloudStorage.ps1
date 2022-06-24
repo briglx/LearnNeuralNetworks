@@ -1,0 +1,6 @@
+﻿cd $ENV:HOME_PATH
+
+#AzCopy /Source:$ENV:VIDEO_SOURCE /Dest:$ENV:RAW_VIDEO_SA_PATH /DestKey:$ENV:RAW_VIDEO_STORAGE_ACCOUNT_KEY /S /V:logs/azcopy1.log
+
+AzCopy /Source:$ENV:VIDEO_SOURCE /Dest:$ENV:RAW_VIDEO_SA_PATH /DestKey:$ENV:RAW_VIDEO_STORAGE_ACCOUNT_KEY  /Pattern:20180329* /V:logs/azcopy2.log
+
